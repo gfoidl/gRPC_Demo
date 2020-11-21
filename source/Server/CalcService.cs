@@ -21,14 +21,28 @@ namespace Server
         //---------------------------------------------------------------------
         public override async Task<IntBinaryOperationResponse> Add(IntBinaryOperationRequest request, ServerCallContext context)
         {
+            this.Log(request, context, '+');
+
+            int result = await _mediator.Send(new AddOperation(request.A, request.B));
+
+            return new IntBinaryOperationResponse { C = result };
+        }
+        //---------------------------------------------------------------------
+        public override async Task<IntBinaryOperationResponse> Mul(IntBinaryOperationRequest request, ServerCallContext context)
+        {
+            this.Log(request, context, '*');
+
+            int result = await _mediator.Send(new MulOperation(request.A, request.B));
+
+            return new IntBinaryOperationResponse { C = result };
+        }
+        //---------------------------------------------------------------------
+        private void Log(IntBinaryOperationRequest request, ServerCallContext context, char operation)
+        {
             HttpContext httpContext = context.GetHttpContext();
 
             _logger.LogInformation($"Connection id: {httpContext.Connection.Id}");
-            _logger.LogInformation($"Handling request for {request.A} + {request.B}");
-
-            int sum = await _mediator.Send(new AddOperation(request.A, request.B));
-
-            return new IntBinaryOperationResponse { C = sum };
+            _logger.LogInformation($"Handling request for {request.A} {operation} {request.B}");
         }
     }
 }
